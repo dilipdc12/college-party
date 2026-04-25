@@ -12,7 +12,13 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
         :root {
             --primary-green: #0e3b24;
             --deep-forest: #1b4d2e;
@@ -20,120 +26,456 @@
             --glass-white: rgba(255, 250, 240, 0.82);
             --gold: #e4b363;
         }
-        body { font-family: 'Montserrat', sans-serif; background: #dce8d4; color: #1a2f1f; overflow-x: hidden; }
-        #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; opacity: 0.7; }
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: #cbdcc0; }
-        ::-webkit-scrollbar-thumb { background: var(--primary-green); border-radius: 12px; }
-        .glass-card { background: var(--glass-white); backdrop-filter: blur(12px); border-radius: 2rem; border: 1px solid rgba(255,255,240,0.6); box-shadow: 0 12px 28px rgba(0,30,0,0.08); }
-        section { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 60px 20px; position: relative; }
-        #hero { text-align: center; background: radial-gradient(circle at 30% 20%, rgba(155,196,155,0.25) 0%, transparent 75%); }
-        .hero-content { max-width: 1000px; margin: 0 auto; padding: 0 12px; }
-        .dept-badge { letter-spacing: 4px; font-weight: 500; font-size: 0.75rem; background: rgba(30,60,35,0.75); display: inline-block; padding: 0.45rem 1.3rem; border-radius: 50px; backdrop-filter: blur(4px); color: #f9f5e0; margin-bottom: 1.2rem; }
-        .main-title { font-family: 'Great Vibes', cursive; font-size: clamp(3.6rem, 12vw, 7rem); margin: 15px 0; background: linear-gradient(135deg, #0e3b24, #2d6a4f, #c7b568); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-        .quote { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-style: italic; max-width: 90%; margin: 1rem auto; color: #2c4b32; border-left: 3px solid var(--gold); padding-left: 1rem; }
-        .countdown-container { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 40px; }
-        .count-box { background: var(--primary-green); color: #fffaec; padding: 0.7rem 0.5rem; border-radius: 28px; min-width: 70px; text-align: center; box-shadow: 0 10px 18px rgba(0,0,0,0.2); }
-        .count-box span { font-size: 1.8rem; font-weight: 800; display: block; }
-        .count-box label { font-size: 0.6rem; text-transform: uppercase; opacity: 0.85; }
-        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 25px; width: 100%; max-width: 1100px; }
-        .info-card { padding: 35px 15px; text-align: center; transition: all 0.3s ease; cursor: pointer; }
-        .info-card:active { transform: scale(0.97); }
-        .info-card h3 { font-size: 2rem; font-weight: 800; margin-bottom: 10px; color: var(--deep-forest); }
-        .info-card p { font-weight: 600; color: #426b49; }
-        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 25px; width: 100%; max-width: 1100px; margin-top: 30px; }
-        .gallery-item { border-radius: 28px; overflow: hidden; position: relative; cursor: pointer; aspect-ratio: 1/1; box-shadow: 0 15px 25px -10px rgba(0,0,0,0.2); transition: transform 0.25s ease; }
-        .gallery-item:active { transform: scale(0.96); }
-        .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
-        .gallery-item:hover img { transform: scale(1.08); }
-        .overlay-caption { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, #0b2b1ae0, transparent); color: white; padding: 14px 10px 8px; transform: translateY(100%); transition: transform 0.3s; text-align: center; font-weight: 600; font-size: 0.85rem; backdrop-filter: blur(3px); }
-        .gallery-item:hover .overlay-caption { transform: translateY(0); }
-        .lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10,25,12,0.96); backdrop-filter: blur(18px); display: flex; justify-content: center; align-items: center; z-index: 2000; cursor: pointer; opacity: 0; visibility: hidden; transition: all 0.25s; }
-        .lightbox.active { opacity: 1; visibility: visible; }
-        .lightbox-img { max-width: 88%; max-height: 80%; border-radius: 28px; border: 2px solid var(--gold); }
-        .close-lightbox { position: absolute; top: 25px; right: 28px; font-size: 42px; color: #faf0ca; background: none; border: none; cursor: pointer; }
-        .message-block { background: rgba(30,60,35,0.18); border-radius: 42px; padding: 40px 24px; text-align: center; max-width: 900px; margin: 0 auto; backdrop-filter: blur(6px); }
-        .message-block h2 { font-family: 'Great Vibes', cursive; font-size: 2.4rem; color: var(--primary-green); }
-        .message-block p { font-size: 1rem; line-height: 1.55; margin-top: 18px; font-style: italic; }
-        footer { padding: 35px 20px; text-align: center; background: #102a1bdd; color: #eef3e6; backdrop-filter: blur(8px); font-size: 0.75rem; }
-        .reveal-up { will-change: transform, opacity; }
-        @media (min-width: 640px) {
-            .count-box { min-width: 95px; padding: 1rem 0.8rem; }
-            .count-box span { font-size: 2.4rem; }
-            .quote { font-size: 1.4rem; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: #dce8d4;
+            color: #1a2f1f;
+            overflow-x: hidden;
+            overflow-y: auto;
         }
-        .bg-grace { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; background: radial-gradient(ellipse at 20% 40%, rgba(185,215,150,0.08) 0%, transparent 70%); z-index: -1; }
+
+        /* 3D Canvas Background */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .bg-grace {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: radial-gradient(ellipse at 20% 40%, rgba(185,215,150,0.08) 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        /* Page containers */
+        .page {
+            position: relative;
+            width: 100%;
+            min-height: 100vh;
+            transition: opacity 0.6s ease;
+        }
+
+        #welcome-page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background: rgba(220, 232, 212, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        #farewell-page {
+            display: none;
+        }
+
+        /* Welcome card */
+        .welcome-card {
+            max-width: 550px;
+            margin: 20px;
+            padding: 50px 35px;
+            background: var(--glass-white);
+            backdrop-filter: blur(16px);
+            border-radius: 48px;
+            border: 1px solid rgba(255,255,240,0.6);
+            box-shadow: 0 25px 45px rgba(0, 30, 0, 0.2);
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .welcome-card h1 {
+            font-family: 'Great Vibes', cursive;
+            font-size: 4rem;
+            background: linear-gradient(135deg, #0e3b24, #2d6a4f, #c7b568);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+
+        .welcome-card p {
+            font-size: 1.2rem;
+            margin: 20px 0;
+            color: #2c4b32;
+        }
+
+        .move-btn {
+            background: var(--primary-green);
+            color: #fffaec;
+            border: none;
+            padding: 16px 40px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .move-btn:active {
+            transform: scale(0.96);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Farewell page styles (same as before) */
+        .glass-card {
+            background: var(--glass-white);
+            backdrop-filter: blur(12px);
+            border-radius: 2rem;
+            border: 1px solid rgba(255,255,240,0.6);
+            box-shadow: 0 12px 28px rgba(0,30,0,0.08);
+        }
+
+        section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            position: relative;
+        }
+
+        #hero {
+            text-align: center;
+            background: radial-gradient(circle at 30% 20%, rgba(155,196,155,0.25) 0%, transparent 75%);
+        }
+
+        .hero-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 12px;
+        }
+
+        .dept-badge {
+            letter-spacing: 4px;
+            font-weight: 500;
+            font-size: 0.75rem;
+            background: rgba(30,60,35,0.75);
+            display: inline-block;
+            padding: 0.45rem 1.3rem;
+            border-radius: 50px;
+            backdrop-filter: blur(4px);
+            color: #f9f5e0;
+            margin-bottom: 1.2rem;
+        }
+
+        .main-title {
+            font-family: 'Great Vibes', cursive;
+            font-size: clamp(3.6rem, 12vw, 7rem);
+            margin: 15px 0;
+            background: linear-gradient(135deg, #0e3b24, #2d6a4f, #c7b568);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .quote {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            font-style: italic;
+            max-width: 90%;
+            margin: 1rem auto;
+            color: #2c4b32;
+            border-left: 3px solid var(--gold);
+            padding-left: 1rem;
+        }
+
+        .countdown-container {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 40px;
+        }
+
+        .count-box {
+            background: var(--primary-green);
+            color: #fffaec;
+            padding: 0.7rem 0.5rem;
+            border-radius: 28px;
+            min-width: 70px;
+            text-align: center;
+            box-shadow: 0 10px 18px rgba(0,0,0,0.2);
+        }
+        .count-box span {
+            font-size: 1.8rem;
+            font-weight: 800;
+            display: block;
+        }
+        .count-box label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            opacity: 0.85;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 25px;
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        .info-card {
+            padding: 35px 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .info-card:active {
+            transform: scale(0.97);
+        }
+        .info-card h3 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            color: var(--deep-forest);
+        }
+        .info-card p {
+            font-weight: 600;
+            color: #426b49;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 25px;
+            width: 100%;
+            max-width: 1100px;
+            margin-top: 30px;
+        }
+
+        .gallery-item {
+            border-radius: 28px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            aspect-ratio: 1/1;
+            box-shadow: 0 15px 25px -10px rgba(0,0,0,0.2);
+            transition: transform 0.25s ease;
+        }
+        .gallery-item:active {
+            transform: scale(0.96);
+        }
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+        .gallery-item:hover img {
+            transform: scale(1.08);
+        }
+        .overlay-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, #0b2b1ae0, transparent);
+            color: white;
+            padding: 14px 10px 8px;
+            transform: translateY(100%);
+            transition: transform 0.3s;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.85rem;
+            backdrop-filter: blur(3px);
+        }
+        .gallery-item:hover .overlay-caption {
+            transform: translateY(0);
+        }
+
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10,25,12,0.96);
+            backdrop-filter: blur(18px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.25s;
+        }
+        .lightbox.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .lightbox-img {
+            max-width: 88%;
+            max-height: 80%;
+            border-radius: 28px;
+            border: 2px solid var(--gold);
+        }
+        .close-lightbox {
+            position: absolute;
+            top: 25px;
+            right: 28px;
+            font-size: 42px;
+            color: #faf0ca;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .message-block {
+            background: rgba(30,60,35,0.18);
+            border-radius: 42px;
+            padding: 40px 24px;
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto;
+            backdrop-filter: blur(6px);
+        }
+        .message-block h2 {
+            font-family: 'Great Vibes', cursive;
+            font-size: 2.4rem;
+            color: var(--primary-green);
+        }
+        .message-block p {
+            font-size: 1rem;
+            line-height: 1.55;
+            margin-top: 18px;
+            font-style: italic;
+        }
+
+        footer {
+            padding: 35px 20px;
+            text-align: center;
+            background: #102a1bdd;
+            color: #eef3e6;
+            backdrop-filter: blur(8px);
+            font-size: 0.75rem;
+        }
+
+        .reveal-up {
+            will-change: transform, opacity;
+        }
+
+        @media (min-width: 640px) {
+            .count-box {
+                min-width: 95px;
+                padding: 1rem 0.8rem;
+            }
+            .count-box span {
+                font-size: 2.4rem;
+            }
+            .quote {
+                font-size: 1.4rem;
+            }
+        }
     </style>
 </head>
 <body>
+
     <canvas id="bg-canvas"></canvas>
     <div class="bg-grace"></div>
 
+    <!-- Audio element: song.mp3 must be in same folder -->
     <audio id="bgMusic" loop preload="auto" crossorigin="anonymous">
         <source src="song.mp3" type="audio/mpeg">
     </audio>
 
-    <section id="hero">
-        <div class="hero-content">
-            <div class="dept-badge reveal-up">DEPARTMENT OF COMPUTER SCIENCE & ENGG</div>
-            <h1 class="main-title reveal-up">Farewell Party</h1>
-            <p class="quote reveal-up">“If you're brave enough to say goodbye, life will reward you with a new hello.”</p>
-            <div class="countdown-container reveal-up" id="timer">
-                <div class="count-box"><span id="days">00</span><label>Days</label></div>
-                <div class="count-box"><span id="hours">00</span><label>Hours</label></div>
-                <div class="count-box"><span id="mins">00</span><label>Mins</label></div>
-                <div class="count-box"><span id="secs">00</span><label>Secs</label></div>
+    <!-- Page 1: Welcome + Button -->
+    <div id="welcome-page" class="page">
+        <div class="welcome-card">
+            <h1>Farewell 2026</h1>
+            <p>Department of Computer Science & Engineering<br>Govt. Polytechnic, Mirle</p>
+            <p>✨ A celebration of memories, friendship, and new beginnings ✨</p>
+            <button class="move-btn" id="moveToFarewellBtn">➡️ Move to Farewell ⬅️</button>
+        </div>
+    </div>
+
+    <!-- Page 2: Full Farewell Page (initially hidden) -->
+    <div id="farewell-page" class="page">
+        <section id="hero">
+            <div class="hero-content">
+                <div class="dept-badge reveal-up">DEPARTMENT OF COMPUTER SCIENCE & ENGG</div>
+                <h1 class="main-title reveal-up">Farewell Party</h1>
+                <p class="quote reveal-up">“If you're brave enough to say goodbye, life will reward you with a new hello.”</p>
+                <div class="countdown-container reveal-up" id="timer">
+                    <div class="count-box"><span id="days">00</span><label>Days</label></div>
+                    <div class="count-box"><span id="hours">00</span><label>Hours</label></div>
+                    <div class="count-box"><span id="mins">00</span><label>Mins</label></div>
+                    <div class="count-box"><span id="secs">00</span><label>Secs</label></div>
+                </div>
+                <div style="margin-top: 28px; font-size: 0.85rem;" class="reveal-up">APRIL 27 | MONDAY | 11:00 AM ⭐</div>
             </div>
-            <div style="margin-top: 28px; font-size: 0.85rem;" class="reveal-up">APRIL 27 | MONDAY | 11:00 AM ⭐</div>
-        </div>
-    </section>
+        </section>
 
-    <section id="details">
-        <div class="info-grid">
-            <div class="glass-card info-card reveal-up"><h3>APRIL 27</h3><p>Monday • 11:00 AM</p><div style="margin-top:12px;">✨ Grand Ceremony ✨</div></div>
-            <div class="glass-card info-card reveal-up"><h3>THE VENUE</h3><p>Govt. Polytechnic, Mirle</p><div style="margin-top:12px;">🎓 Auditorium & Lawn 🎓</div></div>
-            <div class="glass-card info-card reveal-up"><h3>THE VIBE</h3><p>Dance • Music • Lunch</p><div style="margin-top:12px;">🔥 Unforgettable Memories 🔥</div></div>
-        </div>
-    </section>
-
-    <section id="gallery">
-        <div style="text-align: center; width: 100%;">
-            <h2 class="main-title" style="font-size: clamp(2.8rem,10vw,4rem);">Sweet Memories</h2>
-            <p style="font-family:'Playfair Display'; margin-bottom:20px;">✨ tap any photo to relive the moment ✨</p>
-            <div class="gallery-grid">
-                <div class="gallery-item glass-card reveal-up" data-img="memory1.jpg"><img src="memory1.jpg" alt="Memory 1"><div class="overlay-caption">📸 Beautiful Moment</div></div>
-                <div class="gallery-item glass-card reveal-up" data-img="memory2.jpg"><img src="memory2.jpg" alt="Memory 2"><div class="overlay-caption">🎉 Celebration Time</div></div>
-                <div class="gallery-item glass-card reveal-up" data-img="memory3.jpg"><img src="memory3.jpg" alt="Memory 3"><div class="overlay-caption">💚 Forever Together</div></div>
+        <section id="details">
+            <div class="info-grid">
+                <div class="glass-card info-card reveal-up"><h3>APRIL 27</h3><p>Monday • 11:00 AM</p><div style="margin-top:12px;">✨ Grand Ceremony ✨</div></div>
+                <div class="glass-card info-card reveal-up"><h3>THE VENUE</h3><p>Govt. Polytechnic, Mirle</p><div style="margin-top:12px;">🎓 Auditorium & Lawn 🎓</div></div>
+                <div class="glass-card info-card reveal-up"><h3>THE VIBE</h3><p>Dance • Music • Lunch</p><div style="margin-top:12px;">🔥 Unforgettable Memories 🔥</div></div>
             </div>
+        </section>
+
+        <section id="gallery">
+            <div style="text-align: center; width: 100%;">
+                <h2 class="main-title" style="font-size: clamp(2.8rem,10vw,4rem);">Sweet Memories</h2>
+                <p style="font-family:'Playfair Display'; margin-bottom:20px;">✨ tap any photo to relive the moment ✨</p>
+                <div class="gallery-grid">
+                    <div class="gallery-item glass-card reveal-up" data-img="memory1.jpg"><img src="memory1.jpg" alt="Memory 1"><div class="overlay-caption">📸 Beautiful Moment</div></div>
+                    <div class="gallery-item glass-card reveal-up" data-img="memory2.jpg"><img src="memory2.jpg" alt="Memory 2"><div class="overlay-caption">🎉 Celebration Time</div></div>
+                    <div class="gallery-item glass-card reveal-up" data-img="memory3.jpg"><img src="memory3.jpg" alt="Memory 3"><div class="overlay-caption">💚 Forever Together</div></div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="message-block glass-card reveal-up">
+                <h2>✧ A Message From the Heart ✧</h2>
+                <p>“Dear outgoing seniors, you've been the heartbeat of CSE. As you spread your wings, know that the laughter, the code, the friendships will echo forever. Farewell, our stars — go shine infinitely!” <br> — Faculty & CSE Family</p>
+                <div style="margin-top:22px;">🏆✨ Best Wishes for a Brilliant Future ✨🏆</div>
+            </div>
+        </section>
+
+        <footer>
+            <p>© 2026 DEPARTMENT OF COMPUTER SCIENCE & ENGINEERING | GOVT. POLYTECHNIC, MIRLE</p>
+            <p style="font-size:0.7rem; margin-top:10px;">A farewell to cherish — memories forever etched in green 💚</p>
+        </footer>
+
+        <div id="lightbox" class="lightbox">
+            <button class="close-lightbox">&times;</button>
+            <img class="lightbox-img" id="lightboxImg" alt="Enlarged Memory">
         </div>
-    </section>
-
-    <section>
-        <div class="message-block glass-card reveal-up">
-            <h2>✧ A Message From the Heart ✧</h2>
-            <p>“Dear outgoing seniors, you've been the heartbeat of CSE. As you spread your wings, know that the laughter, the code, the friendships will echo forever. Farewell, our stars — go shine infinitely!” <br> — Faculty & CSE Family</p>
-            <div style="margin-top:22px;">🏆✨ Best Wishes for a Brilliant Future ✨🏆</div>
-        </div>
-    </section>
-
-    <footer>
-        <p>© 2026 DEPARTMENT OF COMPUTER SCIENCE & ENGINEERING | GOVT. POLYTECHNIC, MIRLE</p>
-        <p style="font-size:0.7rem; margin-top:10px;">A farewell to cherish — memories forever etched in green 💚</p>
-    </footer>
-
-    <div id="lightbox" class="lightbox">
-        <button class="close-lightbox">&times;</button>
-        <img class="lightbox-img" id="lightboxImg" alt="Enlarged Memory">
     </div>
 
     <script>
         (function() {
-            // ========== MANUAL COUNTDOWN NUMBERS (CHANGE THESE) ==========
+            // ========== COUNTDOWN NUMBERS (change as you like) ==========
             const customDays = 5;
             const customHours = 12;
             const customMins = 30;
             const customSecs = 0;
-            // ============================================================
+            // ==========================================================
+
             let totalSeconds = (customDays * 86400) + (customHours * 3600) + (customMins * 60) + customSecs;
             function updateManualCountdown() {
                 if (totalSeconds <= 0) {
@@ -154,16 +496,17 @@
                 return false;
             }
             updateManualCountdown();
-            setInterval(() => {
+            const countdownInterval = setInterval(() => {
                 if (totalSeconds <= 0) {
+                    clearInterval(countdownInterval);
                     canvasConfetti({ particleCount: 280, spread: 90, origin: { y: 0.6 }, colors: ['#e4b363', '#1b4d2e', '#fff'] });
                 } else {
                     totalSeconds--;
                     updateManualCountdown();
                 }
             }, 1000);
-            
-            // 3D Background (same as before)
+
+            // 3D Background (global, always running)
             const scene = new THREE.Scene();
             scene.background = null;
             const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -226,57 +569,72 @@
                 camera.updateProjectionMatrix();
                 renderer.setSize(window.innerWidth, window.innerHeight);
             });
-            
-            // GSAP
+
+            // GSAP for farewell page elements (will be applied after page becomes visible)
             gsap.registerPlugin(ScrollTrigger);
-            gsap.utils.toArray('.reveal-up').forEach((el, idx) => {
-                gsap.from(el, { scrollTrigger: { trigger: el, start: "top 88%", toggleActions: "play none none reverse" }, y: 40, opacity: 0, duration: 0.9, ease: "power2.out", delay: Math.min(idx * 0.04, 0.6) });
-            });
-            gsap.from('.info-card', { scrollTrigger: { trigger: '#details', start: "top 70%" }, scale: 0.94, opacity: 0, stagger: 0.1, duration: 0.7, ease: "back.out(0.5)" });
-            
-            // Lightbox
-            const lightbox = document.getElementById('lightbox');
-            const lightboxImg = document.getElementById('lightboxImg');
-            const closeLightbox = document.querySelector('.close-lightbox');
-            document.querySelectorAll('.gallery-item').forEach(item => {
-                item.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const imgUrl = item.getAttribute('data-img') || item.querySelector('img').src;
-                    lightboxImg.src = imgUrl;
-                    lightbox.classList.add('active');
-                    document.body.style.overflow = 'hidden';
+            function initFarewellAnimations() {
+                gsap.utils.toArray('#farewell-page .reveal-up').forEach((el, idx) => {
+                    gsap.from(el, {
+                        scrollTrigger: { trigger: el, start: "top 88%", toggleActions: "play none none reverse" },
+                        y: 40, opacity: 0, duration: 0.9, ease: "power2.out", delay: Math.min(idx * 0.04, 0.6)
+                    });
                 });
-            });
-            function closeLightboxFn() { lightbox.classList.remove('active'); document.body.style.overflow = ''; }
-            closeLightbox.addEventListener('click', closeLightboxFn);
-            lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightboxFn(); });
-            document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightboxFn(); });
-            
-            // Confetti on load
+                gsap.from('#farewell-page .info-card', {
+                    scrollTrigger: { trigger: '#details', start: "top 70%" },
+                    scale: 0.94, opacity: 0, stagger: 0.1, duration: 0.7, ease: "back.out(0.5)"
+                });
+                ScrollTrigger.refresh();
+            }
+
+            // Lightbox functionality (only after farewell page is shown)
+            function initLightbox() {
+                const lightbox = document.getElementById('lightbox');
+                const lightboxImg = document.getElementById('lightboxImg');
+                const closeLightbox = document.querySelector('.close-lightbox');
+                document.querySelectorAll('#farewell-page .gallery-item').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const imgUrl = item.getAttribute('data-img') || item.querySelector('img').src;
+                        lightboxImg.src = imgUrl;
+                        lightbox.classList.add('active');
+                        document.body.style.overflow = 'hidden';
+                    });
+                });
+                function closeLightboxFn() { lightbox.classList.remove('active'); document.body.style.overflow = ''; }
+                closeLightbox.addEventListener('click', closeLightboxFn);
+                lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightboxFn(); });
+                document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightboxFn(); });
+            }
+
+            // Confetti on load (only for welcome page)
             window.addEventListener('load', () => {
                 canvasConfetti({ particleCount: 100, spread: 55, origin: { y: 0.7 }, colors: ['#2d6a4f', '#d4af37', '#fef5e0'] });
                 setTimeout(() => canvasConfetti({ particleCount: 60, spread: 70, origin: { y: 0.5, x: 0.2 }, colors: ['#0e3b24', '#e4b363'] }), 300);
             });
-            
-            // ========== MUSIC: Force autoplay + invisible tap fallback ==========
+
+            // MUSIC and PAGE TRANSITION
             const music = document.getElementById('bgMusic');
             music.volume = 0.4;
             music.loop = true;
-            
-            // Try to autoplay immediately
-            const playPromise = music.play();
-            if (playPromise !== undefined) {
-                playPromise.catch(() => {
-                    // Autoplay blocked – add one single, silent tap listener (no UI, no hint)
-                    const unlock = () => {
-                        music.play().catch(e => {});
-                        document.removeEventListener('touchstart', unlock);
-                        document.removeEventListener('click', unlock);
-                    };
-                    document.addEventListener('touchstart', unlock, { once: true });
-                    document.addEventListener('click', unlock, { once: true });
-                });
-            }
+
+            const welcomeDiv = document.getElementById('welcome-page');
+            const farewellDiv = document.getElementById('farewell-page');
+            const moveBtn = document.getElementById('moveToFarewellBtn');
+
+            moveBtn.addEventListener('click', () => {
+                // Hide welcome, show farewell
+                welcomeDiv.style.display = 'none';
+                farewellDiv.style.display = 'block';
+                // Start music (user gesture on button click allows autoplay)
+                music.play().catch(e => console.log("Music play error:", e));
+                // Initialize farewell page animations and lightbox
+                initFarewellAnimations();
+                initLightbox();
+                // Optional: extra confetti on transition
+                canvasConfetti({ particleCount: 150, spread: 70, origin: { y: 0.5 }, colors: ['#1b4d2e', '#e4b363'] });
+                // Refresh scrolltrigger after showing new content
+                setTimeout(() => ScrollTrigger.refresh(), 100);
+            });
         })();
     </script>
 </body>
