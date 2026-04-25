@@ -69,8 +69,7 @@
     <canvas id="bg-canvas"></canvas>
     <div class="bg-grace"></div>
 
-    <!-- Background music: song.mp3 must be in same folder -->
-    <audio id="bgMusic" loop preload="auto">
+    <audio id="bgMusic" loop preload="auto" crossorigin="anonymous">
         <source src="song.mp3" type="audio/mpeg">
     </audio>
 
@@ -129,12 +128,12 @@
 
     <script>
         (function() {
-            // ========== MANUAL COUNTDOWN NUMBERS ==========
-            const customDays = 1;
-            const customHours = 6;
-            const customMins = 20;
+            // ========== MANUAL COUNTDOWN NUMBERS (CHANGE THESE) ==========
+            const customDays = 5;
+            const customHours = 12;
+            const customMins = 30;
             const customSecs = 0;
-            // =============================================
+            // ============================================================
             let totalSeconds = (customDays * 86400) + (customHours * 3600) + (customMins * 60) + customSecs;
             function updateManualCountdown() {
                 if (totalSeconds <= 0) {
@@ -155,9 +154,8 @@
                 return false;
             }
             updateManualCountdown();
-            const timerInterval = setInterval(() => {
+            setInterval(() => {
                 if (totalSeconds <= 0) {
-                    clearInterval(timerInterval);
                     canvasConfetti({ particleCount: 280, spread: 90, origin: { y: 0.6 }, colors: ['#e4b363', '#1b4d2e', '#fff'] });
                 } else {
                     totalSeconds--;
@@ -165,7 +163,7 @@
                 }
             }, 1000);
             
-            // 3D Background
+            // 3D Background (same as before)
             const scene = new THREE.Scene();
             scene.background = null;
             const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -260,13 +258,25 @@
                 setTimeout(() => canvasConfetti({ particleCount: 60, spread: 70, origin: { y: 0.5, x: 0.2 }, colors: ['#0e3b24', '#e4b363'] }), 300);
             });
             
-            // ========== MUSIC: no button, no hint, just autoplay attempt ==========
+            // ========== MUSIC: Force autoplay + invisible tap fallback ==========
             const music = document.getElementById('bgMusic');
             music.volume = 0.4;
             music.loop = true;
+            
             // Try to autoplay immediately
-            music.play().catch(e => console.log("Autoplay blocked by browser"));
-            // No extra UI, no tap message
+            const playPromise = music.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(() => {
+                    // Autoplay blocked – add one single, silent tap listener (no UI, no hint)
+                    const unlock = () => {
+                        music.play().catch(e => {});
+                        document.removeEventListener('touchstart', unlock);
+                        document.removeEventListener('click', unlock);
+                    };
+                    document.addEventListener('touchstart', unlock, { once: true });
+                    document.addEventListener('click', unlock, { once: true });
+                });
+            }
         })();
     </script>
 </body>
