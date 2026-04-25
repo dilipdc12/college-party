@@ -298,6 +298,31 @@
             will-change: transform, opacity;
         }
 
+        /* Subtle music hint - only appears if autoplay blocked, disappears after tap */
+        .music-hint {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            color: #fffaec;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s;
+            white-space: nowrap;
+            font-family: 'Montserrat', sans-serif;
+            letter-spacing: 0.5px;
+        }
+        .music-hint.show {
+            opacity: 1;
+        }
+
         @media (min-width: 640px) {
             .count-box {
                 min-width: 95px;
@@ -328,9 +353,14 @@
     <canvas id="bg-canvas"></canvas>
     <div class="bg-grace"></div>
 
+    <!-- Audio Element: song.mp3 must be in same folder -->
     <audio id="bgMusic" loop preload="auto">
         <source src="song.mp3" type="audio/mpeg">
+        Your browser does not support audio.
     </audio>
+
+    <!-- Subtle hint (only shows if music needs a tap) -->
+    <div id="musicHint" class="music-hint">🎵 Tap anywhere to play music</div>
 
     <section id="hero">
         <div class="hero-content">
@@ -373,7 +403,7 @@
             <h2 class="main-title" style="font-size: clamp(2.8rem, 10vw, 4rem);">Sweet Memories</h2>
             <p style="font-family: 'Playfair Display'; margin-bottom: 20px;">✨ tap any photo to relive the moment ✨</p>
             <div class="gallery-grid" id="galleryGrid">
-                <!-- ONLY 3 IMAGES – SAVE YOUR FILES AS memory1.jpg, memory2.jpg, memory3.jpg -->
+                <!-- 3 images: save as memory1.jpg, memory2.jpg, memory3.jpg -->
                 <div class="gallery-item glass-card reveal-up" data-img="memory1.jpg">
                     <img src="memory1.jpg" alt="Memory 1">
                     <div class="overlay-caption">📸 Beautiful Moment</div>
@@ -413,8 +443,8 @@
             // ========== MANUAL COUNTDOWN NUMBERS ==========
             // 👇 CHANGE THESE NUMBERS AS YOU WISH 👇
             const customDays = 1;    // example: 5 days
-            const customHours = 10;  // example: 12 hours
-            const customMins = 30;   // example: 30 minutes
+            const customHours = 5;  // example: 12 hours
+            const customMins = 20;   // example: 30 minutes
             const customSecs = 0;    // example: 0 seconds
             // =============================================
             
@@ -560,25 +590,42 @@
                 setTimeout(() => canvasConfetti({ particleCount: 60, spread: 70, origin: { y: 0.5, x: 0.2 }, colors: ['#0e3b24', '#e4b363'] }), 300);
             });
             
-            // Music autoplay (no button)
+            // ---------- MUSIC FIX: ensures song plays after any tap ----------
             const music = document.getElementById('bgMusic');
+            const musicHint = document.getElementById('musicHint');
             music.volume = 0.4;
             music.loop = true;
-            function startMusic() { music.play().catch(() => {}); }
-            window.addEventListener('load', () => {
-                startMusic();
-                const resumeAudio = () => {
-                    if (music.paused) music.play().catch(()=>{});
-                    window.removeEventListener('touchstart', resumeAudio);
-                    window.removeEventListener('click', resumeAudio);
-                };
-                if (music.paused) {
-                    window.addEventListener('touchstart', resumeAudio, { once: true });
-                    window.addEventListener('click', resumeAudio, { once: true });
-                }
-            });
-            document.body.addEventListener('touchstart', () => { if (music.paused) music.play().catch(()=>{}); }, { once: true });
             
+            // Try to autoplay immediately
+            const tryAutoplay = () => {
+                music.play().then(() => {
+                    // Success: hide hint if visible
+                    musicHint.classList.remove('show');
+                    // Remove global tap listener after success
+                    document.removeEventListener('touchstart', playOnTap);
+                    document.removeEventListener('click', playOnTap);
+                }).catch(() => {
+                    // Autoplay blocked: show subtle hint and wait for tap
+                    musicHint.classList.add('show');
+                    // Add one-time tap listeners on document
+                    document.addEventListener('touchstart', playOnTap, { once: true });
+                    document.addEventListener('click', playOnTap, { once: true });
+                });
+            };
+            
+            const playOnTap = () => {
+                music.play().then(() => {
+                    musicHint.classList.remove('show');
+                }).catch(e => console.log("Music play failed:", e));
+            };
+            
+            // Start after page load
+            window.addEventListener('load', () => {
+                setTimeout(tryAutoplay, 100); // slight delay to ensure DOM ready
+            });
+            
+            // Also if user taps on any interactive element (gallery, cards) it will also trigger,
+            // but we already have document-level listeners. This ensures music starts on first interaction.
             ScrollTrigger.refresh();
         })();
     </script>
